@@ -3,9 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.cms.web.front;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -40,10 +37,6 @@ import com.thinkgem.jeesite.modules.cms.service.CommentService;
 import com.thinkgem.jeesite.modules.cms.service.LinkService;
 import com.thinkgem.jeesite.modules.cms.service.SiteService;
 import com.thinkgem.jeesite.modules.cms.utils.CmsUtils;
-import com.thinkgem.jeesite.modules.sys.dao.UserDao;
-import com.thinkgem.jeesite.modules.sys.entity.User;
-import com.thinkgem.jeesite.modules.sys.security.FormAuthenticationFilter;
-import com.thinkgem.jeesite.modules.sys.service.SystemService;
 
 /**
  * 网站Controller
@@ -64,12 +57,6 @@ public class FrontController extends BaseController{
 	private CommentService commentService;
 	@Autowired
 	private CategoryService categoryService;
-	
-	@Autowired
-	private UserDao userDao;
-	
-	@Autowired
-	private SystemService systemService;
 	@Autowired
 	private SiteService siteService;
 	
@@ -84,40 +71,6 @@ public class FrontController extends BaseController{
 		return "modules/cms/front/themes/"+site.getTheme()+"/frontIndex";
 	}
 	
-//
-//	/**
-//	 * 网站首页
-//	 */
-//	@RequestMapping(value = "tologin")
-//	public String tologin(Model model) {
-//		Site site = CmsUtils.getSite(Site.defaultSiteId());
-//		model.addAttribute("site", site);
-//		model.addAttribute("isIndex", true);
-//		return "modules/cms/front/themes/"+site.getTheme()+"/sysLogin";
-//	}
-//	
-//
-//	/**
-//	 * 网站首页
-//	 */
-//	@RequestMapping(value = "login", method=RequestMethod.POST)
-//	public String login(Model model,User user,String username,HttpServletRequest request) {
-//		Site site = CmsUtils.getSite(Site.defaultSiteId());
-//		user.setLoginName(username);
-//		User user2=userDao.getByLoginName(user);
-//		String message = (String)request.getAttribute(FormAuthenticationFilter.DEFAULT_MESSAGE_PARAM);
-//		model.addAttribute(FormAuthenticationFilter.DEFAULT_USERNAME_PARAM, username);
-//		model.addAttribute(FormAuthenticationFilter.DEFAULT_MESSAGE_PARAM, message);
-//		if (user2==null||!user2.getPassword().equals(SystemService.entryptPassword(user.getPassword()))){
-//			message = "用户或密码错误, 请重试.";
-//			return "modules/cms/front/themes/"+site.getTheme()+"/sysLogin";
-//		}
-//		request.getSession().setAttribute("user", user2);
-//		model.addAttribute("site", site);
-//		model.addAttribute("isIndex", true);
-//		return "modules/cms/front/themes/"+site.getTheme()+"/frontIndex";
-//	}
-//	
 	/**
 	 * 网站首页
 	 */
@@ -166,20 +119,7 @@ public class FrontController extends BaseController{
 		model.addAttribute("totalpage", new int[page.getLast()]);
 		
 		List<Category> categoryList = categoryService.findByParentId(category.getId(), category.getSite().getId());
-//		Collections.sort(categoryList, new Comparator(){  
-//	        @Override  
-//	        public int compare(Object o1, Object o2) {  
-//	        	Article stu1=(Article)o1;  
-//	        	Article stu2=(Article)o2;  
-//	            if(stu1.getHits()<stu2.getHits()){  
-//	                return 1;  
-//	            }else if(stu1.getHits()==stu2.getHits()){  
-//	                return 0;  
-//	            }else{  
-//	                return -1;  
-//	            }  
-//	        }             
-//	    });  
+		
 		model.addAttribute("category", category);
 		model.addAttribute("categoryList", categoryList);
 		String view = "/frontListCategory";
@@ -332,7 +272,6 @@ public class FrontController extends BaseController{
 			}else{
 				categoryList = categoryService.findByParentId(category.getParent().getId(), category.getSite().getId());
 			}
-			//TODO 是同一个用户加
 			// 获取文章内容
 			Article article = articleService.get(contentId);
 			if (article==null || !Article.DEL_FLAG_NORMAL.equals(article.getDelFlag())){
@@ -359,14 +298,11 @@ public class FrontController extends BaseController{
 	}
 	
 	/**
-	 * 内容评论,comment查询详细内容是查询出评论内容，
-	 * @throws UnsupportedEncodingException 
+	 * 内容评论
 	 */
-	@RequestMapping(value = "tocomment", method=RequestMethod.POST)
-	public String comment(String theme, Comment comment, HttpServletRequest request, HttpServletResponse response, Model model) throws UnsupportedEncodingException {
+	@RequestMapping(value = "comment", method=RequestMethod.GET)
+	public String comment(String theme, Comment comment, HttpServletRequest request, HttpServletResponse response, Model model) {
 		Page<Comment> page = new Page<Comment>(request, response);
-//		String title = new String(comment.getTitle().getBytes("ISO-8859-1"), "UTF-8");
-//		comment.setTitle(title);
 		Comment c = new Comment();
 		c.setCategory(comment.getCategory());
 		c.setContentId(comment.getContentId());
@@ -383,8 +319,8 @@ public class FrontController extends BaseController{
 	@ResponseBody
 	@RequestMapping(value = "comment", method=RequestMethod.POST)
 	public String commentSave(Comment comment, String validateCode,@RequestParam(required=false) String replyId, HttpServletRequest request) {
-				User user=(User) request.getSession().getAttribute("user");
-//				request.getSession().getAttribute("authInfo");
+		if (StringUtils.isNotBlank(validateCode)){
+			if (ValidateCodeServlet.validate(request, validateCode)){
 				if (StringUtils.isNotBlank(replyId)){
 					Comment replyComment = commentService.get(replyId);
 					if (replyComment != null){
@@ -394,14 +330,15 @@ public class FrontController extends BaseController{
 				}
 				comment.setIp(request.getRemoteAddr());
 				comment.setCreateDate(new Date());
-				comment.setDelFlag(Comment.DEL_FLAG_NORMAL);
-				comment.setAuditUser(user);
-				comment.setName(user.getLoginName());
-				comment.setAuditDate(new Date());
+				comment.setDelFlag(Comment.DEL_FLAG_AUDIT);
 				commentService.save(comment);
-				 return JsonUtils.getResult(true, "提交成功");
-			
-		
+				return JsonUtils.getResult(true, "提交成功");
+			}else{
+				return JsonUtils.getResult(false, "验证码不正确");
+			}
+		}else{
+			return JsonUtils.getResult(false, "验证码不能为空");
+		}
 	}
 	
 	/**

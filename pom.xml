@@ -691,65 +691,10 @@
 				<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
-				<!-- <executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<classesDirectory>${project.outputDirectory}</classesDirectory>
-							<finalName>jeesite</finalName>
-							<outputDirectory>${project.build.directory}/${project.artifactId}/WEB-INF/lib</outputDirectory>
-							<includes>
-					        	<include>com/thinkgem/jeesite/**</include>
-					       	</includes>
-						</configuration>
-					</execution>
-				</executions> -->
+			
 			</plugin>
 			
-			<!-- 混淆代码
-			<plugin>
-				<groupId>com.github.wvengen</groupId>
-				<artifactId>proguard-maven-plugin</artifactId>
-				<version>2.0.11</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>proguard</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-			        <obfuscate>true</obfuscate>
-			    	<options>
-                        <option>-injars ${project.build.directory}/${project.artifactId}/WEB-INF/lib/jeesite.jar</option>
-                    </options>
-                    <outjar>${project.artifactId}/WEB-INF/lib/jeesite_out.jar</outjar>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-			        <proguardInclude>${basedir}/proguard.cfg</proguardInclude>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<libs>
-						<lib>${java.home}/lib/rt.jar</lib>
-						<lib>${java.home}/lib/jsse.jar</lib>
-			            <lib>${java.home}/lib/jce.jar</lib>
-					</libs>
-			        <addMavenDescriptor>false</addMavenDescriptor>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>net.sf.proguard</groupId>
-						<artifactId>proguard-base</artifactId>
-						<version>4.9</version>
-						<scope>runtime</scope>
-					</dependency>
-				</dependencies>
-			</plugin> -->
-
+			
 			<!-- war 打包插件, 设定war包名称不带版本号 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -763,21 +708,7 @@
 					</packagingExcludes>
 					<warSourceExcludes>
 						static/bootstrap/2.3.1/docs/**,
-						static/ckeditor/_samples/**,
-						static/ckeditor/_source/**,
-						static/ckfinder/_samples/**,
-						static/ckfinder/help/**,
-						static/compressor*/**,
-						static/jquery-jbox/2.3/docs/**,
-						static/jquery-jbox/2.3/Skins2/**,
-						static/jquery-validation/1.11.0/demo/**,
-						static/jquery-ztree/3.5.12/demo/**,
-						static/My97DatePicker/docs/**,
-						static/supcan/doc/**,
-						static/SuperSlide/demo/**,
-						static/treeTable/demo/**<!-- , -->
-						<!-- userfiles/** --><!-- ,/**/*.jsp -->,
-						test/**
+						
 					</warSourceExcludes>
 					<webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory><!-- 
 					<webXml>${project.basedir}/target/jspweb.xml</webXml> -->
@@ -810,17 +741,7 @@
 				</configuration>
 			</plugin>
 			
-			<!-- tomcat6插件 -->
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat6-maven-plugin</artifactId>
-				<version>${tomcat.version}</version> 
-				<configuration>
-					<port>${webserver.port}</port>
-					<path>/${project.artifactId}</path>
-					<uriEncoding>${project.build.sourceEncoding}</uriEncoding>
-				</configuration>
-			</plugin>
+			
 			
 			<!-- tomcat7插件 -->
 			<plugin>
@@ -922,12 +843,6 @@
 								<!-- mysql -->
 								<property name="dbunit.datatype" value="org.dbunit.ext.mysql.MySqlDataTypeFactory" />
 								
-								<!-- mssql
-								<property name="dbunit.datatype" value="org.dbunit.ext.mssql.MsSqlDataTypeFactory" /> -->
-								
-								<!-- oracle
-								<property name="dbunit.datatype" value="org.dbunit.ext.oracle.Oracle10DataTypeFactory" /> -->
-								
 								<property file="src/main/resources/jeesite.properties" />
 								<sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${jdbc.username}" password="${jdbc.password}" 
 									onerror="continue" encoding="${project.build.sourceEncoding}">
@@ -973,15 +888,6 @@
 		</profile>
 	</profiles>
 	
-	<!-- 开发者信息 -->
-	<developers>  
-		<developer>
-			<id>thinkgem</id>
-			<name>WangZhen</name>
-			<email>thinkgem at 163.com</email>
-			<roles><role>Project lead</role></roles>
-			<timezone>+8</timezone>
-		</developer>
-	</developers>
+
 	
 </project>
